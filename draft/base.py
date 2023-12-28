@@ -1,5 +1,6 @@
 import tkinter as tk
 import background
+import menu 
 
 def on_close():
     pass  # Handle the close event here
@@ -7,9 +8,6 @@ def on_close():
 def on_ctrl_k(event=None):
     # Close the interface when Ctrl+K is pressed
     root.destroy()
-
-def on_window_resize(event):
-    background.set_background(root, "font.png")  
 
 def main():
     global root 
@@ -24,20 +22,22 @@ def main():
     # Bind Ctrl+K event to close the application
     root.bind('<Control-k>', on_ctrl_k)
 
-    # Configure grid weights to make zones expandable
+    '''# Configure grid weights to make zones expandable
     root.grid_rowconfigure(0, weight=1)
     root.grid_rowconfigure(1, weight=6)
     root.grid_columnconfigure(0, weight=1)
-    root.grid_columnconfigure(1, weight=4)
+    root.grid_columnconfigure(1, weight=4)'''
 
-    icon = background.loading_icon(root)
-     
-    root.bind("<Configure>", on_window_resize) 
+    #icon = background.loading_icon(root)
+    #button = menu.recording_button(root)
+    background.set_background(root)
+
+    menu_frame = menu.set_menu_frame(root)
+    menu.add_dropdowns(menu_frame)
+    #menu.add_recording_button(menu_frame)
     
-
     root.mainloop()
     
-    root.mainloop()
 if __name__ == "__main__":
     main()
 
