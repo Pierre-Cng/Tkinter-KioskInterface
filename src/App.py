@@ -11,7 +11,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.configure_kiosk_style()
-        self.set_background()
+        # self.set_background()
         self.Menu = Menu(self.root)
         self.Content = Content(self.root)
 

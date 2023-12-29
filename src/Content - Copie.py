@@ -6,19 +6,17 @@ from tkinter import filedialog
 from matplotlib.figure import Figure
 import numpy as np 
 from tkinter import IntVar
-from Oscilloscope import Oscilloscope
 
 class Content:
     def __init__(self, root):
         self.root = root
         self.set_frame()
-        self.graph = Oscilloscope(self.frame)
-        #self.add_option_frame()
-        #self.plot_graph() 
+        self.add_option_frame()
+        self.plot_graph() 
 
     def set_frame(self):
         self.frame = tk.Frame(self.root)
-        self.frame.pack(fill="both", expand=False)
+        self.frame.pack(fill="y", expand=True)
 
         #self.frame.grid_columnconfigure(column, weight=2)
         #label.grid(row=row, column=column, sticky="nsew", padx=10, pady=10)
