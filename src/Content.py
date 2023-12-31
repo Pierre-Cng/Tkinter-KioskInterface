@@ -3,35 +3,34 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import pandas as pd
 from tkinter import filedialog
-from matplotlib.figure import Figure
+
 import numpy as np 
 from tkinter import IntVar
 from Oscilloscope import Oscilloscope
+from tkinter import ttk
+import tkinter.tix as Tix 
+from src.TreeCheckList import TtkCheckList
 
 class Content:
     def __init__(self, root):
         self.root = root
         self.set_frame()
+        #self.graph_menu()
+        #self.makeCheckList()
+        self.widget()
         self.graph = Oscilloscope(self.frame)
-        #self.add_option_frame()
-        #self.plot_graph() 
-
+    
     def set_frame(self):
-        self.frame = tk.Frame(self.root)
+        self.frame = Tix.Frame(self.root)
+        self.frame.configure(padx=20, pady=10)
         self.frame.pack(fill="both", expand=False)
-
-        #self.frame.grid_columnconfigure(column, weight=2)
-        #label.grid(row=row, column=column, sticky="nsew", padx=10, pady=10)
-
-
-    def add_option_frame(self):
+    '''
+    def graph_menu(self):
         # Checkable options for the graph placed on the left
         options_frame = tk.Frame(self.frame)
         self.frame.grid_columnconfigure(0, weight=1)
-        options_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        options_frame.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
         
-      
-
         check_var1 = IntVar()
         check_var2 = IntVar()
         check_var3 = IntVar()
@@ -44,25 +43,91 @@ class Content:
 
         check3 = tk.Checkbutton(options_frame, text="Option 3", variable=check_var3)
         check3.pack(anchor=tk.W)
+    '''
 
-    def plot_graph(self):
-        # Read CSV data and plot a graph
-        data1 = pd.read_csv('output1.csv')  # Replace with your CSV file path
-        data2 = pd.read_csv('output2.csv') 
+    '''
+    def graph_menu(self):
+        options_frame = ttk.Treeview(self.frame, columns=('Checkboxes',), show='tree')
+        options_frame.heading('#0', text='Tree Elements')
 
-        fig = Figure( dpi=100)
+        num_trees = 4  # Number of trees
+        num_checkboxes_per_tree = 5  # Number of checkboxes in each tree
 
-        ax1 = fig.add_subplot()
-        ax2 = fig.add_subplot()
+        for tree_idx in range(num_trees):
+            tree_node = options_frame.insert('', 'end', text=f'Tree {tree_idx + 1}')
+            for checkbox_idx in range(num_checkboxes_per_tree):
+                checkbox = tk.Checkbutton(self.frame, text=f'Checkbox {checkbox_idx + 1} of Tree {tree_idx + 1}')
+                options_frame_window = options_frame.insert(tree_node, 'end', text='', window=checkbox)
+                options_frame.item(options_frame_window, open=True)
 
-        ax1.plot(data1)
-        ax2.plot(data2)
-        
-        # Embedding the plot in tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.frame)
-        canvas.draw()
-        #canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        self.frame.grid_columnconfigure(1, weight=1)
-        canvas.get_tk_widget().grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    
+          for tree_idx in range(num_trees):
+            tree_node = options_frame.insert('', 'end', text=f'Tree {tree_idx + 1}')
+            for checkbox_idx in range(num_checkboxes_per_tree):
+                checkbox_label = f'Checkbox {checkbox_idx + 1} of Tree {tree_idx + 1}'
+                options_frame.insert(tree_node, 'end', text=checkbox_label)
 
-                
+        #options_frame.pack(expand=True, fill=tk.BOTH)
+        self.frame.grid_columnconfigure(0, weight=1)
+        options_frame.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
+
+    '''
+    '''
+    def graph_menu(self):
+        check_list = Tix.CheckList(self.frame, browsecmd=self.on_select)
+        self.frame.grid_columnconfigure(0, weight=1)
+        check_list.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
+        #check_list.pack(expand=tk.YES, fill=tk.BOTH)
+
+        num_trees = 4  # Number of trees
+        num_checkboxes_per_tree = 5  # Number of checkboxes in each tree
+
+        for tree_idx in range(num_trees):
+            tree_id = check_list.insert('', 'end', text=f'Tree {tree_idx + 1}')
+            for checkbox_idx in range(num_checkboxes_per_tree):
+                checkbox_text = f'Checkbox {checkbox_idx + 1} of Tree {tree_idx + 1}'
+                check_list.insert(tree_id, 'end', text=checkbox_text)
+
+    def on_select(self, item):
+        print(f"Selected item: {item}")
+    '''
+    '''
+    def makeCheckList(self):
+        self.cl = Tix.CheckList(self.frame, browsecmd=self.selectItem)
+        #self.cl.pack()
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.cl.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
+        self.cl.hlist.add("CL1", text="checklist1")
+        self.cl.hlist.add("CL1.Item1", text="subitem1")
+        self.cl.hlist.add("CL2", text="checklist2")
+        self.cl.hlist.add("CL2.Item1", text="subitem1")
+        self.cl.setstatus("CL2", "on")
+        self.cl.setstatus("CL2.Item1", "on")
+        self.cl.setstatus("CL1", "off")
+        self.cl.setstatus("CL1.Item1", "off")
+        self.cl.autosetmode()
+
+    def selectItem(self, item):
+        print(item, self.cl.getstatus(item))
+
+    '''
+    def widget(self):
+        items = [
+            'Item',
+            'Item.SubItem1',
+            'Item.SubItem2',
+            'Item.SubItem2.SubSubItem1',
+            'Item.SubItem2.SubSubItem2',
+            'Item.SubItem2.SubSubItem3',
+            'Item.SubItem3',
+            'Item.SubItem3.SubSubItem1',
+            'Item.SubItem4'
+        ]
+        check_list = TtkCheckList(self.frame, height=len(items))
+
+        for item in items:
+            check_list.add_item(item)
+
+        print(check_list.item('Item', 'text'))
+        self.frame.grid_columnconfigure(0, weight=1)
+        check_list.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)

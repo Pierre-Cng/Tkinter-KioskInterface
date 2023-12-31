@@ -3,7 +3,7 @@ from PIL import Image, ImageTk
 import os
 from Menu import Menu
 from Content import Content
-
+from Actions import Actions
 
 background_image_path = os.path.join(os.getcwd(), r'src\image\font.png')
 
@@ -11,9 +11,11 @@ class App:
     def __init__(self, root):
         self.root = root
         self.configure_kiosk_style()
-        # self.set_background()
+        #self.set_background()
+
         self.Menu = Menu(self.root)
         self.Content = Content(self.root)
+        self.Actions = Actions(self.root, self.Menu, self.Content)
 
     def on_close(self):
         pass  # Handle the close event here

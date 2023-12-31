@@ -4,34 +4,41 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from queue import Queue
 from threading import Thread
+from matplotlib.figure import Figure
 
 class Oscilloscope:
     def __init__(self, root):
         self.data = []
         self.root = root
-       
-
-        self.figure, self.ax = plt.subplots()
-        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
-        self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
+        self.set_subplot()
+        self.set_canvas()
         self.running = False
         self.data_queue = Queue()
-        self.start_button = tk.Button(self.root, text="Start", command=self.start_oscilloscope)
-        self.start_button.pack()
-        
 
-    def start_oscilloscope(self):
+    def set_subplot(self):
+        self.figure = Figure((8, self.root.winfo_screenheight()//150))
+        self.figure.set_facecolor('black')
+        self.ax = self.figure.add_subplot()
+        self.ax.set_facecolor('black')  # Set plot background to black
+        self.ax.tick_params(axis='x', colors='white')  # Set x-axis ticks to white color
+        self.ax.tick_params(axis='y', colors='white')  # Set y-axis ticks to white color
+        self.ax.spines['bottom'].set_color('white')  # Set x-axis color to white
+        self.ax.spines['top'].set_color('white')
+        self.ax.spines['left'].set_color('white')  # Set y-axis color to white
+        self.ax.spines['right'].set_color('white')
+
+    def set_canvas(self):
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
+        self.root.grid_columnconfigure(1, weight=1)
+        self.canvas.get_tk_widget().grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+        
+    def switch_oscilloscope(self):
         self.running = not self.running
         if self.running:
-            self.start_button.config(text="Stop")
             self.acquisition_thread = Thread(target=self.acquire_data)
             self.acquisition_thread.daemon = True
             self.acquisition_thread.start()
             self.update_plot()
-        else:
-            self.start_button.config(text="Start")
 
     def acquire_data(self):
         # Start the subprocess running the Python script (replace paths as needed)
@@ -42,24 +49,23 @@ class Oscilloscope:
             shell=False,  # Set this to True if 'python' is not in your PATH variable
             universal_newlines=True  # For text mode
         )
-
         for line in iter(self.proc.stdout.readline, ''):
             line = line.strip()
             x, y = line.split(',')
-            self.data.append((int(x), int(y)))
+            self.data.append((float(x), float(y)))
         self.proc.stdout.close()
 
     def update_plot(self):
         if self.running:
             self.ax.clear()
             if self.data:
-                x, y = zip(*self.data)
-                self.ax.plot(x, y, 'b-')
-            self.ax.set_xlabel('Time')
-            self.ax.set_ylabel('Amplitude')
-            self.ax.set_title('Oscilloscope')
+                x, y = zip(*self.data[-10:-1])
+                self.ax.plot(x, y, 'orange')
+                self.data = self.data[:-10]
+            self.ax.set_xlabel('Time', color='white')
+            self.ax.set_ylabel('Amplitude', color='white')
+            self.ax.set_title('Oscilloscope', color='white')
             self.canvas.draw()
-
             self.root.after(100, self.update_plot)
 
 def main():
