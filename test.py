@@ -1,5 +1,5 @@
 import tkinter as tk 
-from src.TreeCheckList import TtkCheckList
+from testclaa import TtkCheckList
 
 items = [
     'Item',

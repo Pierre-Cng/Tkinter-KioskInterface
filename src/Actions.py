@@ -1,8 +1,9 @@
 class Actions:
-    def __init__(self, root, menu, content):
+    def __init__(self, root, menu, content, footer):
         self.root = root 
         self.menu = menu 
         self.content = content 
+        self.footer = footer
         self.configure_buttons()
 
     def configure_buttons(self):

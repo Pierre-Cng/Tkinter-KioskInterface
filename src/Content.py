@@ -9,7 +9,7 @@ from tkinter import IntVar
 from Oscilloscope import Oscilloscope
 from tkinter import ttk
 import tkinter.tix as Tix 
-from src.TreeCheckList import TtkCheckList
+from TreeCheckList import TreeCheckList
 
 class Content:
     def __init__(self, root):
@@ -113,21 +113,25 @@ class Content:
     '''
     def widget(self):
         items = [
-            'Item',
-            'Item.SubItem1',
-            'Item.SubItem2',
-            'Item.SubItem2.SubSubItem1',
-            'Item.SubItem2.SubSubItem2',
-            'Item.SubItem2.SubSubItem3',
-            'Item.SubItem3',
-            'Item.SubItem3.SubSubItem1',
-            'Item.SubItem4'
+            'Channel1',
+            'Channel1.Device1',
+            'Channel1.Device1.Signal1',
+            'Channel1.Device1.Signal2',
+            'Channel1.Device1.Signal3',
+            'Channel1.Device2',
+            'Channel1.Device2.Signal1',
+            'Channel1.Device2.Signal2',
+            'Channel1.Device2.Signal3',
+            'Channel2',
+            'Channel2.Device1',
+            'Channel2.Device1.Signal1',
+            'Channel2.Device1.Signal2',
+            'Channel2.Device1.Signal3',
+            'Channel2.Device2',
+            'Channel2.Device2.Signal1',
+            'Channel2.Device2.Signal2',
+            'Channel2.Device2.Signal3',
         ]
-        check_list = TtkCheckList(self.frame, height=len(items))
-
-        for item in items:
-            check_list.add_item(item)
-
-        print(check_list.item('Item', 'text'))
+        check_list = TreeCheckList(self.frame, item_list=items, height=len(items))
         self.frame.grid_columnconfigure(0, weight=1)
         check_list.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)

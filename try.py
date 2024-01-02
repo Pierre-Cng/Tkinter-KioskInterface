@@ -9,10 +9,10 @@ root.geometry('620x200')
 # define columns
 columns = ('first_name', 'last_name', 'email')
 
-tree = ttk.Treeview(root, columns=columns, show='headings')
+tree = ttk.Treeview(root, columns=columns)
 
 # define headings
-tree.heading('first_name', text='First Name')
+tree.heading('first_name', text='First Name3232')
 tree.heading('last_name', text='Last Name')
 tree.heading('email', text='Email')
 
@@ -21,9 +21,11 @@ contacts = []
 for n in range(1, 100):
     contacts.append((f'first {n}', f'last {n}', f'email{n}@example.com'))
 
+tree.insert('', tk.END, iid='test', values=('checked', 'test', 'test'), open=True)
+
 # add data to the treeview
 for contact in contacts:
-    tree.insert('', tk.END, values=contact)
+    tree.insert('test', tk.END, values=contact)
 
 
 def item_selected(event):

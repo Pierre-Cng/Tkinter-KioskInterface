@@ -4,18 +4,44 @@ from tkinter import ttk
 
 class TreeCheckList(ttk.Treeview):
     def __init__(self, master, item_list=None, clicked_list=None, **kwargs):
-        ttk.Treeview.__init__(self, master, **kwargs)
+        columns = ('status', 'iid')
+        ttk.Treeview.__init__(self, master, columns=columns, show='tree', **kwargs)
         self.unchecked = '\u2610'
         self.checked = '\u2612'
         self.separator = '.'
-        self.bind('<<TreeviewSelect>>', self.item_ckeck)
+        if item_list is not None:
+            self.add_items(item_list, clicked_list)
+        self.bind('<<TreeviewSelect>>', self.check_item)
 
-    def item_check(self):
-        pass 
+    def switch_bool_box(self, value, iid=''):
+        dict = {self.checked:True, self.unchecked:False, '':''}
+        reverse_dict= {v: k for k, v in dict.items()}
+        if value in dict:
+            return iid, dict[value]
+        if value in reverse_dict:
+            return iid, reverse_dict[value]
 
-    def insert_item(self):
-        self.insert('', tk.END, values=values) 
+    def add_items(self, item_list, clicked_list=None):
+        clicked_list = ('Item')
+        for item in item_list:
+            try:
+                parent, iid = item.rsplit(self.separator, maxsplit=1)
+                if clicked_list is not None:
+                    value = iid in clicked_list
+                else:
+                    value = False
+            except ValueError:
+                parent, iid, value = '', item, ''
+            self.insert(parent, tk.END, iid=item, values=self.switch_bool_box(value, iid), open=True) 
 
+    def check_item(self, event):
+        for selected_item in self.selection():
+            iid, value = self.item(selected_item)['values']
+            if value != '': 
+                value = value != self.checked 
+            self.item(selected_item, values=(self.switch_bool_box(value, iid)))
+           
+'''
 class TtkCheckList(ttk.Treeview):
     def __init__(self, master=None, width=200, clicked=None, separator='.',
                  unchecked=BALLOT_BOX, checked=BALLOT_BOX_WITH_X, **kwargs):
@@ -32,19 +58,6 @@ class TtkCheckList(ttk.Treeview):
         if element == "text":
             iid = self.identify_row(y)
             self._clicked(iid)
-
-    def add_item(self, item):
-        """
-        Add an item to the checklist. The item is the list of nodes separated
-        by dots: `Item.SubItem.SubSubItem`. **This item is used as `iid`  at
-        the underlying `Treeview` level.**
-        """
-        try:
-            parent_iid, text = item.rsplit(self._separator, maxsplit=1)
-        except ValueError:
-            parent_iid, text = "", item
-        self.insert(parent_iid, index='end', iid=item,
-                    text=text+" "+self._unchecked, open=True)
 
     def toggle(self, iid):
         """
@@ -80,3 +93,4 @@ class TtkCheckList(ttk.Treeview):
 
 
     # json function - is checked - status - colum for the box 
+'''
