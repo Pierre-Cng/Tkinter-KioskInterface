@@ -5,6 +5,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from queue import Queue
 from threading import Thread
 from matplotlib.figure import Figure
+import os 
 
 class Oscilloscope:
     def __init__(self, root):
@@ -43,7 +44,7 @@ class Oscilloscope:
     def acquire_data(self):
         # Start the subprocess running the Python script (replace paths as needed)
         self.proc = subprocess.Popen(
-            ["python", r"C:\Repository\tkinter-Kiosk-interface\data_flow.py"],
+            ["python", f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_flow.py')}'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=False,  # Set this to True if 'python' is not in your PATH variable
