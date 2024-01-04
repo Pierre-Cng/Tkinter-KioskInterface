@@ -1,6 +1,5 @@
 import tkinter as tk
 import subprocess
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from queue import Queue
 from threading import Thread
@@ -42,9 +41,8 @@ class Oscilloscope:
             self.update_plot()
 
     def acquire_data(self):
-        # Start the subprocess running the Python script (replace paths as needed)
         self.proc = subprocess.Popen(
-            ["python", f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_flow.py')}'],
+            ["python", f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'read_csv.py')}'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=False,  # Set this to True if 'python' is not in your PATH variable
@@ -72,6 +70,7 @@ class Oscilloscope:
 def main():
     root = tk.Tk()
     oscilloscope_app = Oscilloscope(root)
+    oscilloscope_app.switch_oscilloscope()
     root.mainloop()
 
 if __name__ == "__main__":
