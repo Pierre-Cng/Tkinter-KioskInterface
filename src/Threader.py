@@ -15,7 +15,7 @@ class Threader:
         self.stop_event = threading.Event()
         self.threads = []
 
-    def tail_file_over_ssh(self, hostname, dbc, stop_event):
+    def tail_file_over_ssh(self, hostname, dbc):
         ssh_client = SshClient(hostname, self.username, self.password)
         ssh_client.connect()
         dbc_exist = ssh_client.check_remote_file_existence(f'~/CAN-CandumpDecoder/src/dbc/{dbc}.dbc')
@@ -24,9 +24,9 @@ class Threader:
         ssh_client.execute_ssh_command(f'./start_recording.sh {dbc}')
         tail_exist = 'False' 
         while tail_exist == 'False':
-            tail_exist = ssh_client.check_remote_file_existence('~/tail_*')
-        stdout = ssh_client.execute_ssh_command("tail -F ./tail_*")
-        while not stop_event.is_set():
+            tail_exist = ssh_client.check_remote_file_existence(f'~/{hostname}__tail_*')
+        stdout = ssh_client.execute_ssh_command(f"tail -F ./{hostname}__tail_*")
+        while not self.stop_event.is_set():
             if stdout.channel.recv_ready():
                 latest_output = stdout.channel.recv(1024).decode()
                 self.output_queue.put(latest_output)
@@ -43,14 +43,14 @@ class Threader:
 
     def monitor_queue(self):
         with open(self.output_file, 'a') as file:
-            while True:
+            while not self.stop_event.is_set():
                 if not self.output_queue.empty():
                     data_line = self.output_queue.get()
                     file.write(data_line + '\n')
 
     def start_multithreading_data_capture(self, devices_conf):
         for device in devices_conf:
-            thread = threading.Thread(target=self.tail_file_over_ssh, args=(device, devices_conf[device], self.stop_event))
+            thread = threading.Thread(target=self.tail_file_over_ssh, args=(device, devices_conf[device]))
             self.threads.append(thread)
             thread.start()
         monitor_thread = threading.Thread(target=self.monitor_queue)
@@ -63,9 +63,14 @@ class Threader:
             thread.join()
         self.threads = []
         for device in devices_conf:
-            thread = threading.Thread(target=self.kill_recording_process, args=(device))
+            thread = threading.Thread(target=self.kill_recording_process, args=(device,))
             self.threads.append(thread)
             thread.start()
         for thread in self.threads:
             thread.join()
 
+obj = Threader('myoutput.txt')
+dev_conf = {'' : ''} # to fill up 
+obj.start_multithreading_data_capture(dev_conf)
+time.sleep(30)
+obj.stop_multithreading_data_capture(dev_conf)
