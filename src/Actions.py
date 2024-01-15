@@ -1,10 +1,13 @@
 from Configurator import Configurator
 import tkinter as tk 
 import json
+from datetime import datetime 
 from tkinter import ttk
 from tkinter import messagebox
 from SshClient import SshClient
 from Popup import Popup
+from Threader import Threader
+
 class Actions:
     def __init__(self, root, menu, content, footer):
         self.config_verified = False
@@ -13,6 +16,7 @@ class Actions:
         self.content = content 
         self.footer = footer
         self.configurator = Configurator()
+        self.threader = Threader()
         self.configure_combos()
         self.configure_buttons()
         self.configure_label()
@@ -51,7 +55,16 @@ class Actions:
         # option to refresh dbc and stack and fetch latest 
         # update config label 
 
+    def output_file_name(self):
+        self.current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        name = ''
+        for comboId in self.combo_choices:
+            name += f'{self.combo_choices[comboId]}_'
+        name += f'_{self.current_datetime}.txt'
+        return name 
+    
     def start_recording(self):
+        
         # Verify if combos and config have been set
         if len(self.combo_choices)<1:
             messagebox.showinfo("Warning", "Please select a vehicle category and number.")
@@ -62,7 +75,9 @@ class Actions:
         # Stopwatch
         self.menu.stopwatch.start_stopwatch()
         # Start command 
-
+        self.dev_conf = {'' : ''} # to remove --------------------------------------
+        output_file = self.output_file_name()
+        self.threader.start_multithreading_data_capture(self.dev_conf, output_file)
         # launch script for stack to record - lauch oscilloscope 
         self.content.graph.switch_oscilloscope()
         self.menu.recording_button.config(text="Stop Recording", command=self.stop_recording, bg='red')
@@ -70,7 +85,8 @@ class Actions:
         #execute_bash_script()
 
     def stop_recording(self):
-        # lauch script to save logs and stop stack - stop stopwatch - stop oscilloscope - allow send data button  
+        # lauch script to save logs and stop stack - stop stopwatch - stop oscilloscope - allow send data button 
+        self.threader.stop_multithreading_data_capture(self.dev_conf) 
         self.menu.stopwatch.stop_stopwatch()
         self.content.graph.switch_oscilloscope()
         self.menu.recording_button.config(text="Start Recording", command=self.start_recording, bg='green')
@@ -78,3 +94,4 @@ class Actions:
     def send_data(self):
         pass
     # when allowed send recorded logs under vehicule + number file name to s3 server 
+

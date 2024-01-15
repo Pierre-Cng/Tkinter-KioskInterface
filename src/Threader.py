@@ -6,10 +6,9 @@ from SshClient import SshClient
 import os
 
 class Threader:  
-    def __init__(self, output_file):
+    def __init__(self):
         self.configurator = Configurator()
         self.output_queue = queue.Queue()
-        self.output_file = output_file
         self.username = self.configurator.data['SSH_parameters']['username']
         self.password = self.configurator.data['SSH_parameters']['password']
         self.stop_event = threading.Event()
@@ -48,7 +47,8 @@ class Threader:
                     data_line = self.output_queue.get()
                     file.write(data_line + '\n')
 
-    def start_multithreading_data_capture(self, devices_conf):
+    def start_multithreading_data_capture(self, devices_conf, output_file):
+        self.output_file = output_file
         for device in devices_conf:
             thread = threading.Thread(target=self.tail_file_over_ssh, args=(device, devices_conf[device]))
             self.threads.append(thread)
@@ -68,9 +68,3 @@ class Threader:
             thread.start()
         for thread in self.threads:
             thread.join()
-
-obj = Threader('myoutput.txt')
-dev_conf = {'' : ''} # to fill up 
-obj.start_multithreading_data_capture(dev_conf)
-time.sleep(30)
-obj.stop_multithreading_data_capture(dev_conf)
