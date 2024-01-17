@@ -1,6 +1,29 @@
 import threading
 import zmq 
 import time 
+import time
+import threading 
+import json
+import os
+
+class Configurator:
+    def __init__(self):
+        self.get_config_backup()
+
+    def get_config_backup(self):
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config_backup.json'), 'r') as file:
+            self.data = json.load(file)
+    
+    def displayed_config_info(self):
+        connected_devices = self.list_connected_devices()
+        displayed_info =''
+        for key, value in self.data['Devices'].items():
+            if key in connected_devices:
+                state = 'connected'
+            else:
+                state = 'disconnected'
+            displayed_info += f"{key}: {value} - {state}\n" 
+        return displayed_info
 
 class TcpManager:
     def __init__(self):
@@ -56,5 +79,3 @@ class TcpManager:
         # use candumpdecoder repo to use the function of putting message into dictionnary self.signals 
         # or output in queue qnother threqd for dictionnqry 
         # qnd plot
-
-

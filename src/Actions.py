@@ -1,23 +1,18 @@
-from Configurator import Configurator
 import tkinter as tk 
-import json
-from tkinter import ttk
-from tkinter import messagebox
-from SshClient import SshClient
-from Popup import Popup
 from queue import Queue
 import threading 
 import math 
-from TcpManager import TcpManager
+from ComManager import Configurator, TcpManager
 
 class Actions:
-    def __init__(self, root, menu, content, footer):
+    def __init__(self, root, menu, content, footer, popup):
         self.data_queue = Queue()
         self.config_verified = False
         self.root = root 
         self.menu = menu 
         self.content = content 
         self.footer = footer
+        self.popup = popup
         self.configurator = Configurator()
         self.configure_combos()
         self.configure_buttons()
@@ -61,9 +56,7 @@ class Actions:
         self.config_verified = True
 
     def modify_config(self):
-        #self.create_popup()
-        popup = tk.Toplevel(self.root)
-        content = Popup(popup)
+        self.popup.activate()
         # open pop up with list of available stack and available dbc - allow user to associate them together 
         # option to refresh dbc and stack and fetch latest 
         # update config label 

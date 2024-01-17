@@ -1,8 +1,7 @@
 import tkinter as tk
-from App import App
+from Interface import App 
 
 def main():
-
     root = tk.Tk()
     App(root)
     root.mainloop()
