@@ -1,20 +1,17 @@
 import zmq
 import time
-import sys 
+
 context = zmq.Context()
-socket = context.socket(zmq.PUB)
+publisher = context.socket(zmq.PUB)
+publisher.bind("tcp://*:5555")
 
-try:
-    socket.bind("")
-except Exception as e:
-    print(f"Error binding to socket: {e}")
-    sys.exit(1)
+# Send a start message to all slaves
+publisher.send_string("start")
 
+# Allow time for slaves to process the start message
+time.sleep(2)
+
+# Receive data from all slaves
 while True:
-    try:
-        topic = b"topic_A"
-        message = b"Hello, subscribers!"
-        socket.send_multipart([topic, message])
-        time.sleep(1)
-    except Exception as e:
-        print(f"Error sending message: {e}")
+    data = publisher.recv_string()
+    print(f"Received data from a device: {data}")

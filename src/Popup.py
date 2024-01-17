@@ -6,9 +6,10 @@ from tkinter import messagebox
 import time
 class Popup:
     def __init__(self, root):
+        self.dbc_list = ['a', 'b', 'c']
+        self.devices_list = Configurator().list_connected_devices()
+        #self.devices_list = ['test', 'test']
         self.root = root
-        #self.devices_list = Configurator().list_connected_devices()
-        self.devices_list = ['test', 'test']
         self.layout()
         self.combo_values = ["Val 1", "Val 2", "Val 3", "Val 4"]  # List to store ComboBox values #use on combo change
 
@@ -31,7 +32,7 @@ class Popup:
         for i, device in enumerate(self.devices_list):
             label = tk.Label(self.device_frame, text=device)
             label.grid(row=i, column=1, padx=5, pady=5, sticky='w')
-            combo = ttk.Combobox(self.device_frame, values=['a', 'b', 'c'], width=5) # ajust with dbc list 
+            combo = ttk.Combobox(self.device_frame, values=self.dbc_list, width=5) # ajust with dbc list 
             combo.set('a')  # Set default choice to 'a'
             combo.grid(row=i, column=2, padx=5, pady=5, sticky='e')
 

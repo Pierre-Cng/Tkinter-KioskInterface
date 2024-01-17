@@ -10,7 +10,7 @@ class TreeCheckList(ttk.Treeview):
         self.checked = '\u2611'
         if item_dict is not None:
             self.add_items(item_dict)
-        self.bind('<<TreeviewSelect>>', self.check_item)
+        #self.bind('<<TreeviewSelect>>', self.check_item)
 
     def switch_bool_box(self, value):
         dict = {self.checked:True, self.unchecked:False}

@@ -2,18 +2,18 @@ import tkinter as tk
 import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from queue import Queue
-from threading import Thread
+import threading
 from matplotlib.figure import Figure
-import os 
 
 class Oscilloscope:
     def __init__(self, root):
-        self.data = []
+        self.signals= {}
+        self.clicked_signals = [] # access that oscilloscope.clicked_signals and refresh it on Tree clicked from action class
         self.root = root
         self.set_subplot()
         self.set_canvas()
         self.running = False
-        self.data_queue = Queue()
+        self.stop_event = threading.Event()
 
     def set_subplot(self):
         self.figure = Figure((8, self.root.winfo_screenheight()//150))
@@ -32,35 +32,33 @@ class Oscilloscope:
         self.root.grid_columnconfigure(1, weight=1)
         self.canvas.get_tk_widget().grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         
-    def switch_oscilloscope(self):
+    def switch_oscilloscope(self, data_queue=None):
         self.running = not self.running
         if self.running:
-            self.acquisition_thread = Thread(target=self.acquire_data)
+            self.stop_event.clear()
+            self.acquisition_thread = threading.Thread(target=self.acquire_data, args=(data_queue, self.stop_event))
             self.acquisition_thread.daemon = True
             self.acquisition_thread.start()
             self.update_plot()
+        elif not self.running:
+            self.stop_event.set()
 
-    def acquire_data(self):
-        self.proc = subprocess.Popen(
-            ["python", f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'read_csv.py')}'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=False,  # Set this to True if 'python' is not in your PATH variable
-            universal_newlines=True  # For text mode
-        )
-        for line in iter(self.proc.stdout.readline, ''):
-            line = line.strip()
-            x, y = line.split(',')
-            self.data.append((float(x), float(y)))
-        self.proc.stdout.close()
+    def acquire_data(self, data_queue, stop_event): # use queue and transform signal into dictionnary, append signals only from given clicked list
+        while not stop_event.is_set():
+            data = data_queue.get()
+            signal, x, y = data.strip().split(',')
+            if signal not in self.signals:
+                self.signals[signal] = {'name': signal, 'x':[], 'y':[]}
+            self.signals[signal]['x'].append(float(x))
+            self.signals[signal]['y'].append(float(y))
 
     def update_plot(self):
         if self.running:
             self.ax.clear()
-            if self.data:
-                x, y = zip(*self.data[-10:-1])
-                self.ax.plot(x, y, 'orange')
-                self.data = self.data[:-10]
+            for signal in self.clicked_signals:
+                self.ax.plot(self.signals[signal]['x'][-10:-1], self.signals[signal]['y'][-10:-1], label=signal)
+            if self.clicked_signals != []:
+                self.ax.legend(loc='upper right', labelcolor='linecolor')
             self.ax.set_xlabel('Time', color='white')
             self.ax.set_ylabel('Amplitude', color='white')
             self.ax.set_title('Oscilloscope', color='white')

@@ -15,7 +15,7 @@ class Content:
         self.frame.pack(fill="both", expand=False)
 
     def set_tree(self):
-        items = {'Channel1': {'Message1': ['Signal']}}
-        self.check_list = TreeCheckList(self.frame, item_dict=items, height=len(items))
+        items = {'Channel1': {'Message1': ['signal1', 'signal2']}}
+        self.tree = TreeCheckList(self.frame, item_dict=items, height=len(items))
         self.frame.grid_columnconfigure(0, weight=1)
-        self.check_list.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
+        self.tree.grid(row=0, column=0, sticky="nsew", padx=30, pady=10)
