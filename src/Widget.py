@@ -122,7 +122,7 @@ class TreeCheckList(ttk.Treeview):
 
     def add_items(self, item_dict):
         for channel in item_dict:
-            self.insert('', tk.END, iid=channel, text='Channel: ' + channel, open=True, tags=channel)
+            self.insert('', tk.END, iid=channel, text='Channel: ' + channel, open=False, tags=channel)
             for message in item_dict[channel].keys():
                 iid_msg = channel + '.' + message
                 self.insert(channel, tk.END, iid=iid_msg, text='\u2937 Message: ' + message, open=True, tags=iid_msg)

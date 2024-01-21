@@ -2,7 +2,9 @@ import tkinter as tk
 from queue import Queue
 import threading 
 import math 
-from ComManager import Configurator, TcpManager
+from ComManager import Configurator, RequestThreader
+import time 
+import cantools 
 
 class Actions:
     def __init__(self, root, menu, content, footer, popup):
@@ -19,7 +21,7 @@ class Actions:
         self.configure_label()
         self.configure_tree()
         self.stop_event = threading.Event()
-        self.tcpmanager = TcpManager()
+        self.requestthreader = RequestThreader()
 
     def configure_combos(self):
         self.combo_choices = {}
@@ -37,23 +39,56 @@ class Actions:
         self.menu.send_button.config(command=self.send_data)
 
     def configure_label(self):
-        #self.menu.config_label.config(text=self.configurator.displayed_config_info())
-        pass
+        self.label_text = tk.StringVar()
+        self.label_text.trace_add('write', self.on_label_change)
+        self.menu.config_label.config(textvariable=self.label_text)
+        #self.label_text.set("New Text")
+    
+    def tree_items(self):
+        items = {}
+        for key, value in self.configurator.data['Devices'].items():
+            items[key] = {}
+            dbc = cantools.database.load_file(value)
+            for message in dbc.messages:
+                items[key][message.name] = []
+                for signal in message.signals:
+                    items[key][message.name].append(signal.name)
+        return items
     
     def configure_tree(self):
+        items = self.tree_items()
+        self.content.tree.add_items(items)
         self.content.tree.bind('<<TreeviewSelect>>', self.on_tree_change)
 
     def on_combo_change(self, event, comboID):
         self.combo_choices[comboID] = self.menu.combos[comboID].get()
+
+    def on_label_change(self, *args):
+        '''
+        if self.label_text.get() == 'Loading...':
+            self.requestthreader.thread_identify_request(self.label_text)
+        '''
+        pass
+        #self.menu.config_label.config(text=response)
+        #self.configurator.get_config_backup()
+        #self.configure_label(connected_devices) 
+        #self.config_verified = True
+            
+        '''displayed_info =''
+        for key, value in self.data['Devices'].items():
+            if key in connected_devices:
+                state = 'connected'
+            else:
+                state = 'disconnected'
+            displayed_info += f"{key}: {value} - {state}\n" 
+        self.menu.config_label.config(text=displayed_info)'''
 
     def on_tree_change(self, event):
         self.content.tree.check_item(event)
         self.content.graph.clicked_signals = self.content.tree.clicked_list
 
     def verify_config(self):
-        self.configurator.get_config_backup()
-        self.configure_label() 
-        self.config_verified = True
+        self.label_text.set('Loading...')
 
     def modify_config(self):
         self.popup.activate()
@@ -81,13 +116,15 @@ class Actions:
         # Stopwatch
         self.menu.stopwatch.start_stopwatch()
         # Start command 
+        self.requestthreader.thread_start_request(self.label_text)
+        '''
         self.stop_event.clear()
         self.dummy_thread = threading.Thread(target=self.dummy_thread_func, args=(self.data_queue, self.stop_event))
         self.dummy_thread.daemon = True
         self.dummy_thread.start()
         self.content.graph.switch_oscilloscope(self.data_queue)
         self.menu.recording_button.config(text="Stop Recording", command=self.stop_recording, bg='red')
-        #print(self.content.tree.clicked_list)
+        #print(self.content.tree.clicked_list)'''
 
     def stop_recording(self):
         # lauch script to save logs and stop stack - stop stopwatch - stop oscilloscope - allow send data button  
