@@ -30,31 +30,32 @@ class TcpManager:
         except Exception as e:
             sys.exit()
 
-    def identify_request(self, label):
-        dict = {'canstack2' : 'dbc1'}
+    def identify_request(self, device_dict, label):
         self.pub_request('identify', 'requested')
-        device_list = []
+        displayed_line_list = []
         for attempt in range(5):
             try:
                 address, id, message = self.router_socket.recv_multipart(zmq.DONTWAIT)
-                line = f'{message.decode()} - connected - {dict[message.decode()]}'
-                if line not in device_list:
-                    device_list.append(line)
+                line = f'{message.decode()} - connected - {device_dict[message.decode()]}'
+                if line not in displayed_line_list:
+                    displayed_line_list.append(line)
             except zmq.Again:
                 pass
-            if device_list == []:
+            if displayed_line_list == []:
                 label.set('Waiting for response...')
             else:
-                label.set("\n".join(device_list))
+                label.set("\n".join(displayed_line_list))
             time.sleep(1)
-        print(device_list)
 
-    def start_request(self, label):
+    def start_request(self, message_queue, stop_event):
         self.pub_request('start', 'requested')
-        while True:
+        id_list = []
+        while not stop_event.is_set():
             try:
                 address, id, message = self.router_socket.recv_multipart(zmq.DONTWAIT)
-                label.set(message.decode())
+                if id not in id_list:
+                    message_queue.put(message.decode())
+                    id_list.append(id)
             except zmq.Again:
                 pass
 
@@ -109,18 +110,18 @@ class RequestThreader:
         data_flow_thread.start()
         return data_flow_thread
     
-    def identify_request(self, label):
+    def identify_request(self, device_dict, label):
         self.tcpmanager = TcpManager()
-        self.tcpmanager.identify_request(label)
+        self.tcpmanager.identify_request(device_dict, label)
         self.tcpmanager.cleanup()
 
-    def start_request(self, label):
+    def start_request(self, message_queue, stop_event):
         self.tcpmanager = TcpManager()
-        self.tcpmanager.start_request(label)
+        self.tcpmanager.start_request(message_queue, stop_event)
         self.tcpmanager.cleanup()
 
-    def thread_identify_request(self, label):
-        thread = self.thread_function(self.identify_request, (label,))
+    def thread_identify_request(self, device_dict, label):
+        thread = self.thread_function(self.identify_request, (device_dict, label))
 
-    def thread_start_request(self, label):
-        thread = self.thread_function(self.start_request, (label,))
+    def thread_start_request(self, message_queue, stop_event):
+        thread = self.thread_function(self.start_request, (message_queue, stop_event))

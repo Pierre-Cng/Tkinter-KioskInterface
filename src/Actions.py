@@ -40,9 +40,12 @@ class Actions:
 
     def configure_label(self):
         self.label_text = tk.StringVar()
+        initial_text = ''
+        for key, value in self.configurator.data['Devices'].items():
+            initial_text += f'{key} - disconneted - {value}\n'
+        self.label_text.set(initial_text)
         self.label_text.trace_add('write', self.on_label_change)
         self.menu.config_label.config(textvariable=self.label_text)
-        #self.label_text.set("New Text")
     
     def tree_items(self):
         items = {}
@@ -64,24 +67,9 @@ class Actions:
         self.combo_choices[comboID] = self.menu.combos[comboID].get()
 
     def on_label_change(self, *args):
-        '''
         if self.label_text.get() == 'Loading...':
-            self.requestthreader.thread_identify_request(self.label_text)
-        '''
-        pass
-        #self.menu.config_label.config(text=response)
-        #self.configurator.get_config_backup()
-        #self.configure_label(connected_devices) 
-        #self.config_verified = True
-            
-        '''displayed_info =''
-        for key, value in self.data['Devices'].items():
-            if key in connected_devices:
-                state = 'connected'
-            else:
-                state = 'disconnected'
-            displayed_info += f"{key}: {value} - {state}\n" 
-        self.menu.config_label.config(text=displayed_info)'''
+            print('identify request')
+            self.requestthreader.thread_identify_request(self.configurator.data['Devices'], self.label_text)
 
     def on_tree_change(self, event):
         self.content.tree.check_item(event)
@@ -116,7 +104,7 @@ class Actions:
         # Stopwatch
         self.menu.stopwatch.start_stopwatch()
         # Start command 
-        self.requestthreader.thread_start_request(self.label_text)
+        #self.requestthreader.thread_start_request(message_queue, stop_event)
         '''
         self.stop_event.clear()
         self.dummy_thread = threading.Thread(target=self.dummy_thread_func, args=(self.data_queue, self.stop_event))

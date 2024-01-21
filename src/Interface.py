@@ -44,7 +44,7 @@ class Menu:
         self.combos['number'] = self.add_combo(column=1)
         self.add_spacer(2, 3)
         # Configuration choice 
-        self.verify_button = self.add_button('Verify Configuration', column=3)
+        self.verify_button = self.add_button('Verify Connection', column=3)
         self.config_label = self.add_label(column=4)
         self.config_button = self.add_button('Modify Configuration', column=5) 
         self.add_spacer(6, 3)
