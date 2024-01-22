@@ -59,11 +59,14 @@ class TcpManager:
             except zmq.Again:
                 pass
 
+    def stop_request(self):
+        self.pub_request('stop', 'requested')
+
     def pub_request(self, topic, message):
         for attempt in range(10):
             try:
                 self.pub_socket.send_multipart([topic.encode(), message.encode()])
-                time.sleep(0.5)
+                time.sleep(1)
             except Exception as e:
                 print(f'Error sending message: {e}')
 
@@ -89,11 +92,6 @@ class TcpManager:
         self.stream_thread.daemon = True
         self.stream_thread.start()
     '''
-       
-    def stop_request(self):
-        self.pub_request('stop', 'requested')
-        self.stop_event.set()
-        
         #from the other side send file when seeing this 
         # message will be decoded can trace messages 
         # use candumpdecoder repo to use the function of putting message into dictionnary self.signals 
@@ -104,8 +102,11 @@ class RequestThreader:
     def __init__(self):
         pass
 
-    def thread_function(self, target, args): 
-        data_flow_thread = threading.Thread(target=target, args=args)
+    def thread_function(self, target, args=None): 
+        if args is None:
+            data_flow_thread = threading.Thread(target=target)
+        else:
+            data_flow_thread = threading.Thread(target=target, args=args)
         data_flow_thread.daemon = True 
         data_flow_thread.start()
         return data_flow_thread
@@ -120,8 +121,16 @@ class RequestThreader:
         self.tcpmanager.start_request(message_queue, stop_event)
         self.tcpmanager.cleanup()
 
+    def stop_request(self):
+        self.tcpmanager = TcpManager()
+        self.tcpmanager.stop_request()
+        self.tcpmanager.cleanup()
+
     def thread_identify_request(self, device_dict, label):
         thread = self.thread_function(self.identify_request, (device_dict, label))
 
     def thread_start_request(self, message_queue, stop_event):
         thread = self.thread_function(self.start_request, (message_queue, stop_event))
+
+    def thread_stop_request(self):
+        thread = self.thread_function(self.stop_request)

@@ -90,10 +90,11 @@ class Oscilloscope:
         if self.running:
             self.ax.clear()
             for signal in self.clicked_signals:
-                if len(self.signals[signal]['x'])>100:
-                    self.ax.plot(self.signals[signal]['x'][-100:-1], self.signals[signal]['y'][-100:-1], label=signal)
-                else:
-                    self.ax.plot(self.signals[signal]['x'], self.signals[signal]['y'], label=signal)
+                if signal in self.signals:
+                    if len(self.signals[signal]['x'])>100:
+                        self.ax.plot(self.signals[signal]['x'][-100:-1], self.signals[signal]['y'][-100:-1], label=signal)
+                    else:
+                        self.ax.plot(self.signals[signal]['x'], self.signals[signal]['y'], label=signal)
             if self.clicked_signals != []:
                 self.ax.legend(loc='upper right', labelcolor='linecolor')
             self.ax.set_xlabel('Time', color='white')

@@ -5,11 +5,11 @@ import math
 from ComManager import Configurator, RequestThreader
 import time 
 import cantools 
+from tkinter import messagebox
 
 class Actions:
     def __init__(self, root, menu, content, footer, popup):
-        self.data_queue = Queue()
-        self.config_verified = False
+        self.connection_verified = False
         self.root = root 
         self.menu = menu 
         self.content = content 
@@ -21,6 +21,7 @@ class Actions:
         self.configure_label()
         self.configure_tree()
         self.stop_event = threading.Event()
+        self.message_queue = Queue()
         self.requestthreader = RequestThreader()
 
     def configure_combos(self):
@@ -77,6 +78,7 @@ class Actions:
 
     def verify_config(self):
         self.label_text.set('Loading...')
+        self.connection_verified = True
 
     def modify_config(self):
         self.popup.activate()
@@ -93,24 +95,23 @@ class Actions:
         
     def start_recording(self):
         # Verify if combos and config have been set
-        '''
         if len(self.combo_choices)<1:
             messagebox.showinfo("Warning", "Please select a vehicle category and number.")
             return
-        if not self.config_verified:
+        if not self.connection_verified:
             messagebox.showinfo("Warning", "Please verify the config before recording.")
             return
-        '''
         # Stopwatch
         self.menu.stopwatch.start_stopwatch()
         # Start command 
-        #self.requestthreader.thread_start_request(message_queue, stop_event)
-        '''
         self.stop_event.clear()
+        self.requestthreader.thread_start_request(self.message_queue, self.stop_event)
+        '''
         self.dummy_thread = threading.Thread(target=self.dummy_thread_func, args=(self.data_queue, self.stop_event))
         self.dummy_thread.daemon = True
         self.dummy_thread.start()
-        self.content.graph.switch_oscilloscope(self.data_queue)
+        '''
+        self.content.graph.switch_oscilloscope(self.message_queue)
         self.menu.recording_button.config(text="Stop Recording", command=self.stop_recording, bg='red')
         #print(self.content.tree.clicked_list)'''
 
@@ -119,6 +120,7 @@ class Actions:
         self.stop_event.set()
         self.menu.stopwatch.stop_stopwatch()
         self.content.graph.switch_oscilloscope()
+        self.requestthreader.thread_stop_request()
         #with open('dictdump.json', 'w') as json_file:
         #    json.dump(self.content.graph.signals, json_file, indent=4)
         self.menu.recording_button.config(text="Start Recording", command=self.start_recording, bg='green')
